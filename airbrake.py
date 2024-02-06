@@ -13,7 +13,7 @@ from helper_objects.servo import servo
 #----------------------------------------------------
 # Constants
 #----------------------------------------------------
-airbrake_deployment_angle = 170
+airbrake_deployment_angle = 120 #120 is 3/4 in deployment
 launch_detection_magnitude = 10
 
 class airbrake:
