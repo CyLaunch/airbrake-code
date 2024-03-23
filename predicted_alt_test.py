@@ -1,5 +1,9 @@
 import numpy as np
 import math
+import time
+from airbrake import airbrake
+
+ab = airbrake()
 
 data = [
 (0,0.0),
@@ -95,5 +99,19 @@ def test_calculations():
         pred_alt = predicted_alt(alt*3.28, vel*3.28)
         #print("Velocity: {} Altitude: {} predicted Alt: {}".format(vel, alt, pred_alt))
         #print("{}".format(pred_alt))
+        try:
+            if pred_alt >= 5000:
+                print("Target altitude exceeded! Deploying airbrakes.")
+                ab.deploy_airbrakes()
+                print("Airbrakes deployed.")
+            else: 
+                ab.retract_airbrakes()
+                print("Airbrakes are retracted.")
+        except:
+            # Let the loop keep going
+            print("Exception caught in AB Deployment loop, looping again")
+        time.sleep(0.2)
+
+
 if __name__ == "__main__":
     test_calculations()
