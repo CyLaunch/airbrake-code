@@ -7,7 +7,8 @@ if(choice == '1'):
     while(char != 'q'):
         char = input("a for accelerometer, b for barometer, m for magnitude of acceleration, d for launch detection, q to quit\n")
         if(char == 'a'):
-            print(ab.get_acceleration())
+            while True:
+                print(ab.get_accel_mag())
         elif(char == 'b'):
             while True:
                 print(ab.get_altitude())

@@ -1,6 +1,6 @@
 #----------------------------------------------------
 # Accelerometer object for the ICM20649
-# @Author Cam or Marcus?
+# @Author Marcus Miller
 # CyLaunch 2023-24
 #----------------------------------------------------
 

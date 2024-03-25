@@ -1,19 +1,26 @@
+
+#----------------------------------------------------
+# Main airbrake actuation loop
+# @Authors Bstickney & bdpope
+# CyLaunch 2023-24
+#----------------------------------------------------
+
 import numpy as np
-from helper_objects import cyllogger
 import time
 import math
 from airbrake import airbrake
 from helper_objects.cyllogger import cyllogger
 
+# ----------------------------------------------------------------------
 # LAUNCH PARAMS
 # ----------------------------------------------------------------------
 TRGT_ALT_FT = 5000.0 
 ALT_MAX_SPEED_FT_S = 700.0
-MOTOR_BURN_TIME_S = 3.0
-AB_ACTUATION_TIME_S = 10.0
-# ----------------------------------------------------------------------
+MOTOR_BURN_TIME_S = 4.0
+AB_ACTUATION_TIME_S = 9.0
+NS_TO_S = 0.000000001
 
-# Airbrakes
+# Airbrake object
 ab = airbrake()
 
 # Logger
@@ -22,8 +29,8 @@ main_log = cyllogger("main")
 def main():
     currSpeed = 0.0
 
-    main_log.writeTo("Entering Detect launch Loop.")
     #Launch Phase
+    main_log.writeTo("Entering Detect launch Loop.")
     while ab.detect_launch() == False:
         time.sleep(0.25) 
         main_log.writeTo("Launch Not Detected.")
@@ -49,31 +56,40 @@ def main():
             else: 
                 ab.retract_airbrakes()
                 main_log.writeTo("Airbrakes are retracted.")
-        except:
-            # Let the loop keep going
+        except Exception as e:
+            main_log.writeTo(e.message)
             main_log.writeTo("Exception caught in AB Deployment loop, looping again")
+            ab.retract_airbrakes()
 
     # Close the airbrakes upon exiting while loop
     ab.retract_airbrakes()
     main_log.writeTo("Timeout Occured, Retracting airbrakes and sleeping")
-    time.sleep(300) # Keeps the airbrakes actively retracted for 5 minutes after apogee
+
+    # Keeps the airbrakes actively retracted for 5 minutes after apogee
+    time.sleep(300) 
     main_log.writeTo("Sleep complete, woohoo! I survived launch!")
 
 class Calculations:
     def current_speed():
         alt_s1 = ab.get_altitude()
+        before_time_ns = time.time_ns()
+
         alt_s2 = ab.get_altitude()
-        accSpeed = 0.0
-        altSpeed = (alt_s2-alt_s1)/0.02
+        after_time_ns = time.time_ns()
+
+        time_delta_s = (after_time_ns - before_time_ns) * NS_TO_S
+
+        altSpeed = (alt_s2-alt_s1)/time_delta_s
+
         if altSpeed > ALT_MAX_SPEED_FT_S: #This can change so it makes sense just if its outside of bounds
-            ab.retract_airbrakes()
+            ab.retract_airbrakes() #TODO we should not be retracting here, it should be in main Brenner take a look
             return 1.0
         else:
             return altSpeed
     
     def predicted_alt(alt,velocity): 
-        m=30.25 #lbs 
-        Cd=0.61 #CHANGE for each rocket!! 
+        m=26.75 #lbs 
+        Cd=0.53 #CHANGE for each rocket!! 
         A= 0.2413 # ft^2 
         rho=0.062 #lbs/ft^3 at 2000ft 
         g=32.16789 #ft/s^2 

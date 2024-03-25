@@ -7,6 +7,8 @@ import time
 import board
 import adafruit_bmp3xx
 
+MT_TO_FT = 3.28084
+
 class barometer:
     def __init__(self):
         i2c = board.I2C()
@@ -16,4 +18,4 @@ class barometer:
 
     # Returns the altitude in feet
     def get_altitude(self):
-        return self.bmp.altitude*3.28084
+        return self.bmp.altitude * MT_TO_FT
